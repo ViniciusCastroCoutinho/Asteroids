@@ -27,6 +27,7 @@ class World:
         self.wave_cool = C.WAVE_DELAY
         self.safe = C.SAFE_SPAWN_TIME
         self.ufo_timer = C.UFO_SPAWN_EVERY
+        self.game_over = False  # Sinaliza fim de jogo para a cena principal
 
     def start_wave(self):
         # Spawn a new asteroid wave with difficulty based on the current round.
@@ -162,10 +163,10 @@ class World:
             self.spawn_asteroid(pos, dirv * speed, s)
 
     def ship_die(self):
-        # Remove one life and reset or restart the game when needed.
+        # Remove uma vida; sinaliza game over ou reposiciona a nave.
         self.lives -= 1
         if self.lives <= 0:
-            self.__init__()
+            self.game_over = True  # Game.run() detecta e muda de cena
             return
         self.ship.pos.xy = (C.WIDTH / 2, C.HEIGHT / 2)
         self.ship.vel.xy = (0, 0)

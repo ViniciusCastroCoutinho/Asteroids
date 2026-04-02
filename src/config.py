@@ -42,3 +42,6 @@ GRAY = (120, 120, 120)
 BLACK = (0, 0, 0)
 
 RANDOM_SEED = None
+
+# Duração do fade-in da tela de game over (segundos)
+GAME_OVER_FADE_DURATION = 1.5

@@ -18,3 +18,7 @@ Note: pre-commit only modifies files on staging area.
 Run `python src/main.py`
 There is a debug mode for testing stuff, mostly drawing. Run the file with the `--debug` flag:
 `python src/main.py --debug`
+
+## Credits
+Power up original assets by  Eric "ConcernedApe" Barone
+Missing texture by Valve Corporation

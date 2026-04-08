@@ -7,8 +7,8 @@ from random import uniform
 import pygame as pg
 
 import config as C
-from sprites import Asteroid, Ship, UFO
-from utils import Vec, rand_edge_pos, rand_unit_vec
+from sprites import Asteroid, Ship, UFO, PowerUp, EnumPowerUps
+from utils import Vec, rand_edge_pos, rand_unit_vec, draw_image
 
 
 class World:
@@ -20,7 +20,9 @@ class World:
         self.ufo_bullets = pg.sprite.Group()
         self.asteroids = pg.sprite.Group()
         self.ufos = pg.sprite.Group()
+        self.power_ups = pg.sprite.Group()
         self.all_sprites = pg.sprite.Group(self.ship)
+
         self.score = 0
         self.lives = C.START_LIVES
         self.wave = 0
@@ -72,10 +74,16 @@ class World:
         """Fire a player bullet when the bullet cap allows it."""
         if len(self.bullets) >= C.MAX_BULLETS:
             return
-        b = self.ship.fire()
-        if b:
-            self.bullets.add(b)
-            self.all_sprites.add(b)
+        bullets = self.ship.fire()
+        if bullets:
+            for b in bullets:
+                self.bullets.add(b)
+                self.all_sprites.add(b)
+
+    def spawn_power_up(self, pos: Vec, power_up: str):
+        pw_up = PowerUp(pos, power_up)
+        self.power_ups.add(pw_up)
+        self.all_sprites.add(pw_up)
 
     def hyperspace(self):
         """Trigger the ship hyperspace action and apply its score penalty."""
@@ -107,6 +115,7 @@ class World:
 
     def handle_collisions(self):
         """Resolve collisions between bullets, asteroids, UFOs, and the ship."""
+        # asteroid is hit
         hits = pg.sprite.groupcollide(
             self.asteroids,
             self.bullets,
@@ -127,6 +136,7 @@ class World:
         for ast, _ in ufo_hits.items():
             self.split_asteroid(ast)
 
+        # ship is hit
         if self.ship.invuln <= 0 and self.safe <= 0:
             for ast in self.asteroids:
                 if (ast.pos - self.ship.pos).length() < (ast.r + self.ship.r):
@@ -142,6 +152,15 @@ class World:
                     self.ship_die()
                     break
 
+        # power ups
+        for pw in self.power_ups:
+            if pg.sprite.collide_rect(pw, self.ship):
+                pw.kill()
+                self.ship.powerup = pw.type
+                self.ship.powerup_duration = C.POWERUP_DURATION
+                break
+
+        # ufo is hit
         for ufo in list(self.ufos):
             for b in list(self.bullets):
                 if (ufo.pos - b.pos).length() < (ufo.r + b.r):
@@ -149,6 +168,8 @@ class World:
                     self.score += score
                     ufo.kill()
                     b.kill()
+                    # if not ufo.small:
+                    self.spawn_power_up(ufo.pos, "SHOTGUN")
 
     def split_asteroid(self, ast: Asteroid):
         """Destroy an asteroid, award score, and spawn its smaller fragments."""
@@ -178,7 +199,16 @@ class World:
         for spr in self.all_sprites:
             spr.draw(surf)
 
-        pg.draw.line(surf, (60, 60, 60), (0, 50), (C.WIDTH, 50), width=1)
+        if self.ship.powerup:
+            image_rect = draw_image(
+                surf,
+                (C.WIDTH - (C.WIDTH / 10), 5),
+                EnumPowerUps[self.ship.powerup].value,
+            ).get_rect()
+            image_rect.topleft = (C.WIDTH - (C.WIDTH / 10), 5)
+            pg.draw.rect(surf, C.WHITE, image_rect, width=1)
+
+        pg.draw.line(surf, (60, 60, 60), (0, 60), (C.WIDTH, 60), width=1)
         txt = f"SCORE {self.score:06d}   LIVES {self.lives}   WAVE {self.wave}"
         label = font.render(txt, True, C.WHITE)
         surf.blit(label, (10, 10))

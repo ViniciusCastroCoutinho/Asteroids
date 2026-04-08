@@ -38,17 +38,22 @@ class Bullet(pg.sprite.Sprite):
         super().__init__()
         self.pos = Vec(pos)
         self.vel = Vec(vel)
-        self.ttl = C.BULLET_TTL
+        self.ttl = C.BULLET_TTL  # time to live
         self.r = C.BULLET_RADIUS
         self.rect = pg.Rect(0, 0, self.r * 2, self.r * 2)
 
     def update(self, dt: float):
-        """Move the bullet, wrap it on screen, and expire it over time"""
-        self.pos += self.vel * dt
-        self.pos = wrap_pos(self.pos)
+        """
+        Move the bullet, wrap it on screen, and expire it over time.
+        :param dt: time passed
+        """
         self.ttl -= dt
         if self.ttl <= 0:
             self.kill()
+            return
+
+        self.pos += self.vel * dt
+        self.pos = wrap_pos(self.pos)
         self.rect.center = self.pos
 
     def draw(self, surf: pg.Surface):
@@ -131,6 +136,9 @@ class Ship(pg.sprite.Sprite):
         self.r = C.SHIP_RADIUS
         self.rect = pg.Rect(0, 0, self.r * 2, self.r * 2)
 
+        self.powerup = ""  # Default = ""
+        self.powerup_duration = 0
+
     def control(self, keys: pg.key.ScancodeWrapper, dt: float):
         """Apply rotation, thrust, and friction from the current input state"""
         if keys[pg.K_LEFT]:
@@ -141,15 +149,30 @@ class Ship(pg.sprite.Sprite):
             self.vel += angle_to_vec(self.angle) * C.SHIP_THRUST * dt
         self.vel *= C.SHIP_FRICTION
 
-    def fire(self) -> Bullet | None:
-        """Spawn a player bullet when the fire cooldown allows it"""
+    def fire(self) -> list[Bullet] | None:
+        """
+        Spawn a player bullet when the fire cooldown allows it.
+        Returns a tuple containing a Bullet object and a powerup string
+        """
         if self.cool > 0:
             return None
         dirv = angle_to_vec(self.angle)
         pos = self.pos + dirv * (self.r + 6)
         vel = self.vel + dirv * C.SHIP_BULLET_SPEED
         self.cool = C.SHIP_FIRE_RATE
-        return Bullet(pos, vel)
+
+        if self.powerup == "SHOTGUN":
+            dirv2 = angle_to_vec(self.angle + C.SHOTGUN_ANGLE)
+            pos2 = self.pos + dirv2 * (self.r + 6)
+            vel2 = self.vel + dirv2 * C.SHIP_BULLET_SPEED
+
+            dirv3 = angle_to_vec(self.angle - C.SHOTGUN_ANGLE)
+            pos3 = self.pos + dirv3 * (self.r + 6)
+            vel3 = self.vel + dirv3 * C.SHIP_BULLET_SPEED
+
+            return [Bullet(pos, vel), Bullet(pos2, vel2), Bullet(pos3, vel3)]
+        else:
+            return [Bullet(pos, vel)]
 
     def hyperspace(self):
         """Teleport the ship to a random location and reset its momentum"""
@@ -163,6 +186,12 @@ class Ship(pg.sprite.Sprite):
             self.cool -= dt
         if self.invuln > 0:
             self.invuln -= dt
+        if self.powerup_duration > 0:
+            self.powerup_duration -= dt
+
+        if self.powerup_duration <= 0:
+            self.powerup = ""
+
         self.pos += self.vel * dt
         self.pos = wrap_pos(self.pos)
         self.rect.center = self.pos
@@ -178,6 +207,7 @@ class Ship(pg.sprite.Sprite):
         draw_poly(surf, [p1, p2, p3])
         if self.invuln > 0 and int(self.invuln * 10) % 2 == 0:
             draw_circle(surf, self.pos, self.r + 6)
+        # pg.draw.rect(surf, C.WHITE, self.rect, width=1)
 
 
 class UFO(pg.sprite.Sprite):
@@ -236,12 +266,33 @@ class PowerUp(pg.sprite.Sprite):
     def __init__(self, pos: Vec, power_up_type: str):
         super().__init__()
         self.pos = Vec(pos)
-        self.type = EnumPowerUps[power_up_type]
+        self.type = power_up_type
+        self.image = pg.image.load(EnumPowerUps[self.type].value).convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.topleft = self.pos.x, self.pos.y
+        self.idle_time = 1
+        self.state = "down"  # just for idle animation
 
-    def idle(self, dt: float):
+    def update(self, dt: float):
         """Animate the power up"""
-        pass
+        if self.idle_time > 0:
+            self.idle_time -= dt
+
+        else:
+            if self.state == "down":
+                self.pos.y -= 5
+                self.state = "up"
+
+            elif self.state == "up":
+                self.pos.y += 5
+                self.state = "down"
+
+            self.idle_time = 1
+
+            self.pos = wrap_pos(self.pos)
+            self.rect.topleft = self.pos
 
     def draw(self, surf: pg.Surface):
         """Draw the power up on the target surface"""
-        draw_image(surf, self.pos, self.type)
+        draw_image(surf, self.pos, self.image)
+        # pg.draw.rect(surf, C.WHITE, self.rect, width=1)

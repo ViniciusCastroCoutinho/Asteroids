@@ -65,13 +65,27 @@ def text(surface: pg.Surface, font: pg.font.Font, s: str, x: int, y: int):
 def draw_image(
     surface: pg.Surface,
     pos: Vec,
-    image_path=os.path.join(resources, "Missing.png"),
-    new_resolution: tuple | None = None,
+    image: pg.Surface | str = None,
+    new_res: tuple | None = None,
 ):
-    if isinstance(image_path, sprites.EnumPowerUps):
-        image_path = image_path.value
-    image = pg.image.load(image_path).convert_alpha()
-    if new_resolution:
-        image = pg.transform.scale(image, new_resolution)
+    """
+    Draws an image
+    :param surface: Surface to draw on
+    :param pos: In what position to draw on
+    :param image: can be an already loaded image or a path to an image
+    :param new_res: (width, height) for new resolution of image.
+    """
+    if not image:
+        image = os.path.join(resources, "Missing.png")
+
+    if not isinstance(image, pg.Surface):
+        if isinstance(image, sprites.EnumPowerUps):
+            image = image.value
+
+        image = pg.image.load(image).convert_alpha()
+
+    if new_res:
+        image = pg.transform.scale(image, new_res)
 
     surface.blit(image, pos)
+    return image

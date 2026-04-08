@@ -1,5 +1,5 @@
 # Asteroids
-This project is a fork of
+This project is a fork of https://github.com/jucimarjr/asteroids_pygame.
 Using Python (3.13):
 
 ```pip install -r requirements.txt```

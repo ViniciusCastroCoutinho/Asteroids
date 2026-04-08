@@ -7,7 +7,28 @@ from random import uniform
 import pygame as pg
 
 import config as C
-from utils import Vec, angle_to_vec, draw_circle, draw_poly, wrap_pos
+from utils import Vec, angle_to_vec, draw_circle, draw_poly, wrap_pos, draw_image
+from enum import Enum
+import os
+
+current_directory = dir_path = os.path.dirname(os.path.realpath(__file__))
+resources = os.path.join(current_directory, "resources")
+
+
+class EnumPowerUps(Enum):
+    """File paths for power up images"""
+
+    SHOTGUN = os.path.join(resources, "Shotgun.png")
+    # future power ups go here
+    MISSING = os.path.join(resources, "Missing.png")
+
+    @classmethod
+    def _missing_(cls, value):
+        # If not valid value, return MISSING
+        for member in cls:
+            if member.value == value:
+                return member
+        return cls.MISSING
 
 
 class Bullet(pg.sprite.Sprite):
@@ -207,3 +228,20 @@ class UFO(pg.sprite.Sprite):
         cup = pg.Rect(0, 0, w * 0.5, h * 0.7)
         cup.center = (self.pos.x, self.pos.y - h * 0.3)
         pg.draw.ellipse(surf, C.WHITE, cup, width=1)
+
+
+class PowerUp(pg.sprite.Sprite):
+    """Initialize a Powerup"""
+
+    def __init__(self, pos: Vec, power_up_type: str):
+        super().__init__()
+        self.pos = Vec(pos)
+        self.type = EnumPowerUps[power_up_type]
+
+    def idle(self, dt: float):
+        """Animate the power up"""
+        pass
+
+    def draw(self, surf: pg.Surface):
+        """Draw the power up on the target surface"""
+        draw_image(surf, self.pos, self.type)

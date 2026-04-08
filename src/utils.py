@@ -8,6 +8,11 @@ from typing import Iterable, Tuple
 import pygame as pg
 
 import config as C
+import os
+import sprites
+
+current_directory = dir_path = os.path.dirname(os.path.realpath(__file__))
+resources = os.path.join(current_directory, "resources")
 
 Vec = pg.math.Vector2
 
@@ -55,3 +60,18 @@ def text(surface: pg.Surface, font: pg.font.Font, s: str, x: int, y: int):
     surf = font.render(s, True, C.WHITE)
     rect = surf.get_rect(topleft=(x, y))
     surface.blit(surf, rect)
+
+
+def draw_image(
+    surface: pg.Surface,
+    pos: Vec,
+    image_path=os.path.join(resources, "Missing.png"),
+    new_resolution: tuple | None = None,
+):
+    if isinstance(image_path, sprites.EnumPowerUps):
+        image_path = image_path.value
+    image = pg.image.load(image_path).convert_alpha()
+    if new_resolution:
+        image = pg.transform.scale(image, new_resolution)
+
+    surface.blit(image, pos)

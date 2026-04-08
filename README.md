@@ -15,4 +15,6 @@ How to use:
 Note: pre-commit only modifies files on staging area.
 
 ## How to Run
-On `src` folder, run `python main.py`
+Run `python src/main.py`
+There is a debug mode for testing stuff, mostly drawing. Run the file with the `--debug` flag:
+`python src/main.py --debug`

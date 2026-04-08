@@ -25,7 +25,7 @@ class Game:
         if C.RANDOM_SEED is not None:
             random.seed(C.RANDOM_SEED)
         self.screen = pg.display.set_mode((C.WIDTH, C.HEIGHT))
-        pg.display.set_caption("Asteroides")
+        pg.display.set_caption("Asteroids")
         self.clock = pg.time.Clock()
         self.font = pg.font.SysFont("consolas", 20)
         self.big = pg.font.SysFont("consolas", 48)

@@ -20,5 +20,5 @@ There is a debug mode for testing stuff, mostly drawing. Run the file with the `
 `python src/main.py --debug`
 
 ## Credits
-Power up original assets by  Eric "ConcernedApe" Barone
+Power up original assets by  Eric "ConcernedApe" Barone  
 Missing texture by Valve Corporation

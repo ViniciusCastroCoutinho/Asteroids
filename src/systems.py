@@ -1,4 +1,3 @@
-
 # ASTEROIDE SINGLEPLAYER v1.0
 # This file coordinates world state, spawning, collisions, scoring, and progression.
 
@@ -13,7 +12,8 @@ from utils import Vec, rand_edge_pos, rand_unit_vec
 
 
 class World:
-    # Initialize the world state, entity groups, timers, and player progress.
+    """Initialize the world state, entity groups, timers, and player progress."""
+
     def __init__(self):
         self.ship = Ship(Vec(C.WIDTH / 2, C.HEIGHT / 2))
         self.bullets = pg.sprite.Group()
@@ -30,7 +30,7 @@ class World:
         self.game_over = False  # Sinaliza fim de jogo para a cena principal
 
     def start_wave(self):
-        # Spawn a new asteroid wave with difficulty based on the current round.
+        """Spawn a new asteroid wave with difficulty based on the current round."""
         self.wave += 1
         count = 3 + self.wave
         for _ in range(count):
@@ -43,13 +43,13 @@ class World:
             self.spawn_asteroid(pos, vel, "L")
 
     def spawn_asteroid(self, pos: Vec, vel: Vec, size: str):
-        # Create an asteroid and register it in the world groups.
+        """Create an asteroid and register it in the world groups."""
         a = Asteroid(pos, vel, size)
         self.asteroids.add(a)
         self.all_sprites.add(a)
 
     def spawn_ufo(self):
-        # Spawn a single UFO at a screen edge and send it across the playfield.
+        """Spawn a single UFO at a screen edge and send it across the playfield."""
         if self.ufos:
             return
         small = uniform(0, 1) < 0.5
@@ -61,7 +61,7 @@ class World:
         self.all_sprites.add(ufo)
 
     def ufo_try_fire(self):
-        # Let every active UFO attempt to fire at the ship.
+        """Let every active UFO attempt to fire at the ship."""
         for ufo in self.ufos:
             bullet = ufo.fire_at(self.ship.pos)
             if bullet:
@@ -69,7 +69,7 @@ class World:
                 self.all_sprites.add(bullet)
 
     def try_fire(self):
-        # Fire a player bullet when the bullet cap allows it.
+        """Fire a player bullet when the bullet cap allows it."""
         if len(self.bullets) >= C.MAX_BULLETS:
             return
         b = self.ship.fire()
@@ -78,12 +78,12 @@ class World:
             self.all_sprites.add(b)
 
     def hyperspace(self):
-        # Trigger the ship hyperspace action and apply its score penalty.
+        """Trigger the ship hyperspace action and apply its score penalty."""
         self.ship.hyperspace()
         self.score = max(0, self.score - C.HYPERSPACE_COST)
 
     def update(self, dt: float, keys):
-        # Update the world simulation, timers, enemy behavior, and progression.
+        """Update the world simulation, timers, enemy behavior, and progression."""
         self.ship.control(keys, dt)
         self.all_sprites.update(dt)
         if self.safe > 0:
@@ -106,7 +106,7 @@ class World:
             self.wave_cool -= dt
 
     def handle_collisions(self):
-        # Resolve collisions between bullets, asteroids, UFOs, and the ship.
+        """Resolve collisions between bullets, asteroids, UFOs, and the ship."""
         hits = pg.sprite.groupcollide(
             self.asteroids,
             self.bullets,
@@ -145,14 +145,13 @@ class World:
         for ufo in list(self.ufos):
             for b in list(self.bullets):
                 if (ufo.pos - b.pos).length() < (ufo.r + b.r):
-                    score = (C.UFO_SMALL["score"] if ufo.small
-                             else C.UFO_BIG["score"])
+                    score = C.UFO_SMALL["score"] if ufo.small else C.UFO_BIG["score"]
                     self.score += score
                     ufo.kill()
                     b.kill()
 
     def split_asteroid(self, ast: Asteroid):
-        # Destroy an asteroid, award score, and spawn its smaller fragments.
+        """Destroy an asteroid, award score, and spawn its smaller fragments."""
         self.score += C.AST_SIZES[ast.size]["score"]
         split = C.AST_SIZES[ast.size]["split"]
         pos = Vec(ast.pos)
@@ -163,7 +162,7 @@ class World:
             self.spawn_asteroid(pos, dirv * speed, s)
 
     def ship_die(self):
-        # Remove uma vida; sinaliza game over ou reposiciona a nave.
+        """Remove uma vida; sinaliza game over ou reposiciona a nave."""
         self.lives -= 1
         if self.lives <= 0:
             self.game_over = True  # Game.run() detecta e muda de cena
@@ -175,7 +174,7 @@ class World:
         self.safe = C.SAFE_SPAWN_TIME
 
     def draw(self, surf: pg.Surface, font: pg.font.Font):
-        # Draw all world entities and the current HUD information.
+        """Draw all world entities and the current HUD information."""
         for spr in self.all_sprites:
             spr.draw(surf)
 

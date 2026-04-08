@@ -1,4 +1,3 @@
-
 # ASTEROIDE SINGLEPLAYER v1.0
 # This file manages the application loop, scenes, input handling, and screen drawing.
 
@@ -19,7 +18,8 @@ class Scene:
 
 
 class Game:
-    # Initialize pygame, shared UI resources, and the initial scene state.
+    """Initialize pygame, shared UI resources, and the initial scene state"""
+
     def __init__(self):
         pg.init()
         if C.RANDOM_SEED is not None:
@@ -31,11 +31,11 @@ class Game:
         self.big = pg.font.SysFont("consolas", 48)
         self.scene = Scene("menu")
         self.world = World()
-        self.final_score = 0    # Pontuação capturada no momento do game over
-        self.go_fade = 0.0      # Temporizador de fade-in da tela de game over
+        self.final_score = 0  # Pontuação capturada no momento do game over
+        self.go_fade = 0.0  # Temporizador de fade-in da tela de game over
 
     def run(self):
-        # Process events, update the active scene, and render each frame.
+        """Process events, update the active scene, and render each frame"""
         while True:
             dt = self.clock.tick(C.FPS) / 1000.0
             for e in pg.event.get():
@@ -84,7 +84,7 @@ class Game:
             pg.display.flip()
 
     def draw_game_over(self):
-        # Exibe a tela de game over com fade-in, pontuação final e instruções.
+        """Exibe a tela de game over com fade-in, pontuação final e instruções"""
         alpha = min(255, int(255 * self.go_fade / C.GAME_OVER_FADE_DURATION))
 
         overlay = pg.Surface((C.WIDTH, C.HEIGHT), pg.SRCALPHA)
@@ -94,24 +94,42 @@ class Game:
         if alpha < 60:
             return
 
-        text(self.screen, self.big, "GAME OVER",
-             C.WIDTH // 2 - 130, C.HEIGHT // 2 - 100)
-        text(self.screen, self.font,
-             f"Pontuacao final: {self.final_score:06d}",
-             C.WIDTH // 2 - 110, C.HEIGHT // 2 - 20)
-        text(self.screen, self.font,
-             "Enter / Espaco: jogar novamente",
-             C.WIDTH // 2 - 150, C.HEIGHT // 2 + 40)
-        text(self.screen, self.font,
-             "ESC: menu principal",
-             C.WIDTH // 2 - 90, C.HEIGHT // 2 + 80)
+        text(
+            self.screen, self.big, "GAME OVER", C.WIDTH // 2 - 130, C.HEIGHT // 2 - 100
+        )
+
+        text(
+            self.screen,
+            self.font,
+            f"Pontuacao final: {self.final_score:06d}",
+            C.WIDTH // 2 - 110,
+            C.HEIGHT // 2 - 20,
+        )
+
+        text(
+            self.screen,
+            self.font,
+            "Enter / Espaco: jogar novamente",
+            C.WIDTH // 2 - 150,
+            C.HEIGHT // 2 + 40,
+        )
+
+        text(
+            self.screen,
+            self.font,
+            "ESC: menu principal",
+            C.WIDTH // 2 - 90,
+            C.HEIGHT // 2 + 80,
+        )
 
     def draw_menu(self):
-        # Draw the title screen and the basic control instructions.
-        text(self.screen, self.big, "ASTEROIDS",
-             C.WIDTH // 2 - 150, 180)
-        text(self.screen, self.font,
-             "Setas: virar/acelerar  Espaço: tiro  Shift: hiper",
-             160, 300)
-        text(self.screen, self.font,
-             "Pressione qualquer tecla...", 260, 360)
+        """Draw the title screen and the basic control instructions"""
+        text(self.screen, self.big, "ASTEROIDS", C.WIDTH // 2 - 150, 180)
+        text(
+            self.screen,
+            self.font,
+            "Setas: virar/acelerar  Espaço: tiro  Shift: hiper",
+            160,
+            300,
+        )
+        text(self.screen, self.font, "Pressione qualquer tecla...", 260, 360)

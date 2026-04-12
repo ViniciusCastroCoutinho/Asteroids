@@ -18,17 +18,17 @@ resources = os.path.join(current_directory, "resources")
 class EnumPowerUps(Enum):
     """File paths for power up images"""
 
-    SHOTGUN = os.path.join(resources, "Shotgun.png")
-    # future power ups go here
-    MISSING = os.path.join(resources, "Missing.png")
+    # SHOTGUN = os.path.join(resources, "Shotgun.png")
+    ONE_UP = os.path.join(resources, "One_Up.png")
 
     @classmethod
     def _missing_(cls, value):
         # If not valid value, return MISSING
+        MISSING = os.path.join(resources, "Missing.png")
         for member in cls:
             if member.value == value:
                 return member
-        return cls.MISSING
+        return MISSING
 
 
 class Bullet(pg.sprite.Sprite):

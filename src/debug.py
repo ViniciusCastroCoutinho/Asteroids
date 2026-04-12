@@ -28,6 +28,10 @@ class GameDebug:
         self.font = pg.font.SysFont("consolas", 20)
         self.big = pg.font.SysFont("consolas", 48)
         self.world = World()
+        # God Mode
+        C.START_LIVES = 98
+        C.SAFE_SPAWN_TIME = 99
+        C.MAX_BULLETS = 20
 
     def run(self):
         while True:
@@ -83,7 +87,7 @@ class GameDebug:
             # utils.draw_image(self.screen, pw.pos, image=pw.image)
             #
             if self.i:
-                self.world.spawn_power_up(test_pos, "SHOTGUN")
+                self.world.spawn_power_up(test_pos, "ONE_UP")
                 self.i = 0
 
             # print(list(self.world.power_ups.sprites())[0].pos)

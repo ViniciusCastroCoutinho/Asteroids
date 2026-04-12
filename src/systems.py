@@ -93,6 +93,12 @@ class World:
                 self.bullets.add(b)
                 self.all_sprites.add(b)
 
+    def spawn_random_powerup(self, pos: Vec):
+        choice = random.choice([pw.name for pw in EnumPowerUps])
+        print([pw.name for pw in EnumPowerUps])
+        print(choice)
+        self.spawn_power_up(pos, choice)
+
     def spawn_power_up(self, pos: Vec, power_up: str):
         pw_up = PowerUp(pos, power_up)
         self.power_ups.add(pw_up)
@@ -169,8 +175,11 @@ class World:
         for pw in self.power_ups:
             if pg.sprite.collide_rect(pw, self.ship):
                 pw.kill()
-                self.ship.powerup = pw.type
-                self.ship.powerup_duration = C.POWERUP_DURATION
+                if pw.type != "ONE_UP":
+                    self.ship.powerup = pw.type
+                    self.ship.powerup_duration = C.POWERUP_DURATION
+                else:
+                    self.lives += 1
                 break
 
         # ufo is hit
@@ -181,8 +190,8 @@ class World:
                     self.score += score
                     ufo.kill()
                     b.kill()
-                    if not ufo.small:
-                        self.spawn_power_up(ufo.pos, "SHOTGUN")
+                    # if not ufo.small:
+                    self.spawn_random_powerup(ufo.pos)
 
     def split_asteroid(self, ast: Asteroid):
         """Destroy/Damage an asteroid, award score, and spawn its smaller fragments."""
@@ -211,7 +220,7 @@ class World:
                         self.score += score
                         ufo.kill()
                         if not ufo.small:
-                            self.spawn_power_up(ufo.pos, "SHOTGUN")
+                            self.spawn_random_powerup(ufo.pos)
                 if (self.ship.pos - ast.pos).length() <= C.EXPLOSIVE_AST_RANGE:
                     if self.ship.invuln <= 0 and self.safe <= 0:
                         self.ship_die()

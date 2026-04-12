@@ -43,15 +43,23 @@ class World:
             ang = uniform(0, math.tau)
             speed = uniform(C.AST_VEL_MIN, C.AST_VEL_MAX)
             vel = Vec(math.cos(ang), math.sin(ang)) * speed
-            tough_asteroid_chance = random.randint(1, 100)
-            if tough_asteroid_chance <= C.TOUGH_AST_CHANCE:
-                self.spawn_asteroid(pos, vel, "L", tough=True)
+            special_chance = random.randint(1, 100)
+            if (
+                special_chance <= C.TOUGH_AST_CHANCE
+                and special_chance <= C.EXPLOSIVE_AST_CHANCE
+            ):
+                choice = random.choice(["tough", "explosive"])
+                self.spawn_asteroid(pos, vel, "L", type=choice)
+            elif special_chance <= C.TOUGH_AST_CHANCE:
+                self.spawn_asteroid(pos, vel, "L", type="tough")
+            elif special_chance <= C.EXPLOSIVE_AST_CHANCE:
+                self.spawn_asteroid(pos, vel, "L", type="explosive")
             else:
                 self.spawn_asteroid(pos, vel, "L")
 
-    def spawn_asteroid(self, pos: Vec, vel: Vec, size: str, tough: bool = False):
+    def spawn_asteroid(self, pos: Vec, vel: Vec, size: str, type: str = "normal"):
         """Create an asteroid and register it in the world groups."""
-        a = Asteroid(pos, vel, size, tough)
+        a = Asteroid(pos, vel, size, type)
         self.asteroids.add(a)
         self.all_sprites.add(a)
 
@@ -173,8 +181,8 @@ class World:
                     self.score += score
                     ufo.kill()
                     b.kill()
-                    # if not ufo.small:
-                    self.spawn_power_up(ufo.pos, "SHOTGUN")
+                    if not ufo.small:
+                        self.spawn_power_up(ufo.pos, "SHOTGUN")
 
     def split_asteroid(self, ast: Asteroid):
         """Destroy/Damage an asteroid, award score, and spawn its smaller fragments."""
@@ -184,10 +192,29 @@ class World:
         ast.hp -= 1
         if ast.hp == 0:
             ast.kill()
-            for s in split:
-                dirv = rand_unit_vec()
-                speed = uniform(C.AST_VEL_MIN, C.AST_VEL_MAX) * 1.2
-                self.spawn_asteroid(pos, dirv * speed, s)
+            if ast.type != "explosive":
+                for s in split:
+                    dirv = rand_unit_vec()
+                    speed = uniform(C.AST_VEL_MIN, C.AST_VEL_MAX) * 1.2
+                    self.spawn_asteroid(pos, dirv * speed, s)
+
+            # explosive asteroid
+            else:
+                for other_ast in self.asteroids:
+                    if (other_ast.pos - ast.pos).length() <= C.EXPLOSIVE_AST_RANGE:
+                        self.split_asteroid(other_ast)
+                for ufo in self.ufos:
+                    if (ufo.pos - ast.pos).length() <= C.EXPLOSIVE_AST_RANGE:
+                        score = (
+                            C.UFO_SMALL["score"] if ufo.small else C.UFO_BIG["score"]
+                        )
+                        self.score += score
+                        ufo.kill()
+                        if not ufo.small:
+                            self.spawn_power_up(ufo.pos, "SHOTGUN")
+                if (self.ship.pos - ast.pos).length() <= C.EXPLOSIVE_AST_RANGE:
+                    if self.ship.invuln <= 0 and self.safe <= 0:
+                        self.ship_die()
 
     def ship_die(self):
         """Remove uma vida; sinaliza game over ou reposiciona a nave."""

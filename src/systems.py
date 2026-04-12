@@ -2,6 +2,7 @@
 # This file coordinates world state, spawning, collisions, scoring, and progression.
 
 import math
+import random
 from random import uniform
 
 import pygame as pg
@@ -42,11 +43,15 @@ class World:
             ang = uniform(0, math.tau)
             speed = uniform(C.AST_VEL_MIN, C.AST_VEL_MAX)
             vel = Vec(math.cos(ang), math.sin(ang)) * speed
-            self.spawn_asteroid(pos, vel, "L")
+            tough_asteroid_chance = random.randint(1, 100)
+            if tough_asteroid_chance <= C.TOUGH_AST_CHANCE:
+                self.spawn_asteroid(pos, vel, "L", tough=True)
+            else:
+                self.spawn_asteroid(pos, vel, "L")
 
-    def spawn_asteroid(self, pos: Vec, vel: Vec, size: str):
+    def spawn_asteroid(self, pos: Vec, vel: Vec, size: str, tough: bool = False):
         """Create an asteroid and register it in the world groups."""
-        a = Asteroid(pos, vel, size)
+        a = Asteroid(pos, vel, size, tough)
         self.asteroids.add(a)
         self.all_sprites.add(a)
 
@@ -172,15 +177,17 @@ class World:
                     self.spawn_power_up(ufo.pos, "SHOTGUN")
 
     def split_asteroid(self, ast: Asteroid):
-        """Destroy an asteroid, award score, and spawn its smaller fragments."""
+        """Destroy/Damage an asteroid, award score, and spawn its smaller fragments."""
         self.score += C.AST_SIZES[ast.size]["score"]
         split = C.AST_SIZES[ast.size]["split"]
         pos = Vec(ast.pos)
-        ast.kill()
-        for s in split:
-            dirv = rand_unit_vec()
-            speed = uniform(C.AST_VEL_MIN, C.AST_VEL_MAX) * 1.2
-            self.spawn_asteroid(pos, dirv * speed, s)
+        ast.hp -= 1
+        if ast.hp == 0:
+            ast.kill()
+            for s in split:
+                dirv = rand_unit_vec()
+                speed = uniform(C.AST_VEL_MIN, C.AST_VEL_MAX) * 1.2
+                self.spawn_asteroid(pos, dirv * speed, s)
 
     def ship_die(self):
         """Remove uma vida; sinaliza game over ou reposiciona a nave."""

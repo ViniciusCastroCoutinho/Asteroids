@@ -24,6 +24,7 @@ AST_SIZES = {
     "M": {"r": 24, "score": 50, "split": ["S", "S"]},
     "S": {"r": 12, "score": 100, "split": []},
 }
+TOUGH_AST_CHANCE = 10
 
 BULLET_RADIUS = 2
 BULLET_TTL = 1.0
@@ -44,6 +45,8 @@ UFO_SMALL = {"r": 12, "score": 1000, "aim": 0.6}
 WHITE = (240, 240, 240)
 GRAY = (120, 120, 120)
 BLACK = (0, 0, 0)
+BRIGHT_RED = (120, 0, 0)
+DARK_RED = (60, 0, 0)
 
 RANDOM_SEED = None
 

@@ -89,11 +89,16 @@ class UfoBullet(pg.sprite.Sprite):
 class Asteroid(pg.sprite.Sprite):
     """Initialize an asteroid with its position, velocity, and size profile"""
 
-    def __init__(self, pos: Vec, vel: Vec, size: str):
+    def __init__(self, pos: Vec, vel: Vec, size: str, tough: bool = False):
         super().__init__()
         self.pos = Vec(pos)
         self.vel = Vec(vel)
         self.size = size
+        self.tough = tough
+        if self.tough:
+            self.hp = 3
+        else:
+            self.hp = 1
         self.r = C.AST_SIZES[size]["r"]
         self.poly = self._make_poly()
         self.rect = pg.Rect(0, 0, self.r * 2, self.r * 2)
@@ -119,6 +124,10 @@ class Asteroid(pg.sprite.Sprite):
     def draw(self, surf: pg.Surface):
         """Draw the asteroid outline on the target surface"""
         pts = [(self.pos + p) for p in self.poly]
+        if self.hp == 3:
+            pg.draw.polygon(surf, C.BRIGHT_RED, pts, width=0)
+        elif self.hp == 2:
+            pg.draw.polygon(surf, C.DARK_RED, pts, width=0)
         pg.draw.polygon(surf, C.WHITE, pts, width=1)
 
 

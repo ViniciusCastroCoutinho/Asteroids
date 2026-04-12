@@ -21,7 +21,9 @@ There is a debug mode for testing stuff, mostly drawing. Run the file with the `
 
 ## New Features
 * Shotgun Powerup
+* One Up Powerup
 * Tough Asteroid
+* Explosive Asteroid
 
 ## Credits
 Power up original assets by  Eric "ConcernedApe" Barone  

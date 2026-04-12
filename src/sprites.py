@@ -272,6 +272,57 @@ class UFO(pg.sprite.Sprite):
         cup.center = (self.pos.x, self.pos.y - h * 0.3)
         pg.draw.ellipse(surf, C.WHITE, cup, width=1)
 
+class Hunter(pg.sprite.Sprite):
+    """Enemy ship that actively chases the player using steering behaviors."""
+
+    def __init__(self, pos: Vec, target: Ship):
+        super().__init__()
+        self.target = target
+        self.pos = Vec(pos)
+        self.vel = Vec(0, 0)
+        
+        # Reusing UFO Small radius for collision consistency
+        self.r = C.UFO_SMALL["r"]
+        self.speed = C.HUNTER_SPEED
+        self.rect = pg.Rect(0, 0, self.r * 2, self.r * 2)
+
+    def update(self, dt: float):
+        """Calculate direction to player and adjust velocity."""
+        if not self.target.alive:
+            return
+
+        # 1. Get direction vector towards the player
+        aim_vec = self.target.pos - self.pos
+        
+        if aim_vec.length_squared() > 0:
+            aim_vec = aim_vec.normalize()
+
+        # 2. Apply acceleration towards the player using agility factor
+        acceleration = aim_vec * self.speed * dt * C.HUNTER_AGILITY
+        self.vel += acceleration
+        
+        # 3. Apply friction to prevent infinite orbiting
+        self.vel *= 0.98 
+
+        # 4. Cap maximum speed
+        if self.vel.length() > self.speed:
+            self.vel.scale_to_length(self.speed)
+
+        # 5. Update position and wrap around screen
+        self.pos += self.vel
+        self.pos = wrap_pos(self.pos)
+        self.rect.center = self.pos
+
+    def draw(self, surf: pg.Surface):
+        w, h = self.r * 2, self.r
+        rect = pg.Rect(0, 0, w, h)
+        rect.center = self.pos
+        pg.draw.ellipse(surf, C.BRIGHT_RED, rect, width=1)
+        
+        # Cockpit/Cup
+        cup = pg.Rect(0, 0, w * 0.5, h * 0.7)
+        cup.center = (self.pos.x, self.pos.y - h * 0.3)
+        pg.draw.ellipse(surf, C.WHITE, cup, width=1)
 
 class PowerUp(pg.sprite.Sprite):
     """Initialize a Powerup"""

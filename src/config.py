@@ -43,6 +43,10 @@ UFO_BULLET_TTL = 1.8
 UFO_BIG = {"r": 18, "score": 200, "aim": 0.2}
 UFO_SMALL = {"r": 12, "score": 1000, "aim": 0.6}
 
+HUNTER_SPAWN_TOTAL = 25.0
+HUNTER_SPEED = 100.0
+HUNTER_AGILITY = 0.1
+
 WHITE = (240, 240, 240)
 GRAY = (120, 120, 120)
 BLACK = (0, 0, 0)

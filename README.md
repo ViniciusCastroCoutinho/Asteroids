@@ -24,6 +24,7 @@ There is a debug mode for testing stuff, mostly drawing. Run the file with the `
 * One Up Powerup
 * Tough Asteroid
 * Explosive Asteroid
+* Player Targeting Enemy
 
 ## Credits
 Power up original assets by  Eric "ConcernedApe" Barone  

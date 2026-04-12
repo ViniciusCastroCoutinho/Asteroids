@@ -8,7 +8,7 @@ from random import uniform
 import pygame as pg
 
 import config as C
-from sprites import Asteroid, Ship, UFO, PowerUp, EnumPowerUps
+from sprites import Asteroid, Ship, UFO, PowerUp, EnumPowerUps, Hunter
 from utils import Vec, rand_edge_pos, rand_unit_vec, draw_image
 
 
@@ -23,6 +23,7 @@ class World:
         self.ufos = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
         self.all_sprites = pg.sprite.Group(self.ship)
+        self.hunters = pg.sprite.Group()
 
         self.score = 0
         self.lives = C.START_LIVES
@@ -30,6 +31,7 @@ class World:
         self.wave_cool = C.WAVE_DELAY
         self.safe = C.SAFE_SPAWN_TIME
         self.ufo_timer = C.UFO_SPAWN_EVERY
+        self.hunter_timer = C.HUNTER_SPAWN_TOTAL
         self.game_over = False  # Sinaliza fim de jogo para a cena principal
 
     def start_wave(self):
@@ -124,6 +126,16 @@ class World:
             self.spawn_ufo()
             self.ufo_timer = C.UFO_SPAWN_EVERY
 
+        self.hunter_timer -= dt
+        if self.hunter_timer <= 0:
+            pos = rand_edge_pos()
+            # Ensure hunter doesn't spawn on top of player
+            if (pos - self.ship.pos).length() > 200:
+                new_h = Hunter(pos, self.ship)
+                self.hunters.add(new_h)
+                self.all_sprites.add(new_h)
+                self.hunter_timer = C.HUNTER_SPAWN_TOTAL
+
         self.handle_collisions()
 
         if not self.asteroids and self.wave_cool <= 0:
@@ -155,6 +167,15 @@ class World:
         for ast, _ in ufo_hits.items():
             self.split_asteroid(ast)
 
+        hunter_hits = pg.sprite.groupcollide(
+            self.hunters, self.bullets, True, True,
+            collided=lambda h, b: (h.pos - b.pos).length() < (h.r + b.r)
+        )
+        for h_hit in hunter_hits:
+            self.score += 250
+            if random.random() < 0.2:
+                self.spawn_random_powerup(h_hit.pos)
+
         # ship is hit
         if self.ship.invuln <= 0 and self.safe <= 0:
             for ast in self.asteroids:
@@ -163,6 +184,10 @@ class World:
                     break
             for ufo in self.ufos:
                 if (ufo.pos - self.ship.pos).length() < (ufo.r + self.ship.r):
+                    self.ship_die()
+                    break
+            for h in self.hunters:
+                if (h.pos - self.ship.pos).length() < (h.r + self.ship.r):
                     self.ship_die()
                     break
             for bullet in self.ufo_bullets:

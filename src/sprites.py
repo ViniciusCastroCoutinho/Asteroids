@@ -18,7 +18,7 @@ resources = os.path.join(current_directory, "resources")
 class EnumPowerUps(Enum):
     """File paths for power up images"""
 
-    # SHOTGUN = os.path.join(resources, "Shotgun.png")
+    SHOTGUN = os.path.join(resources, "Shotgun.png")
     ONE_UP = os.path.join(resources, "One_Up.png")
 
     @classmethod
@@ -272,6 +272,7 @@ class UFO(pg.sprite.Sprite):
         cup.center = (self.pos.x, self.pos.y - h * 0.3)
         pg.draw.ellipse(surf, C.WHITE, cup, width=1)
 
+
 class Hunter(pg.sprite.Sprite):
     """Enemy ship that actively chases the player using steering behaviors."""
 
@@ -280,7 +281,7 @@ class Hunter(pg.sprite.Sprite):
         self.target = target
         self.pos = Vec(pos)
         self.vel = Vec(0, 0)
-        
+
         # Reusing UFO Small radius for collision consistency
         self.r = C.UFO_SMALL["r"]
         self.speed = C.HUNTER_SPEED
@@ -293,16 +294,16 @@ class Hunter(pg.sprite.Sprite):
 
         # 1. Get direction vector towards the player
         aim_vec = self.target.pos - self.pos
-        
+
         if aim_vec.length_squared() > 0:
             aim_vec = aim_vec.normalize()
 
         # 2. Apply acceleration towards the player using agility factor
         acceleration = aim_vec * self.speed * dt * C.HUNTER_AGILITY
         self.vel += acceleration
-        
+
         # 3. Apply friction to prevent infinite orbiting
-        self.vel *= 0.98 
+        self.vel *= 0.98
 
         # 4. Cap maximum speed
         if self.vel.length() > self.speed:
@@ -318,11 +319,12 @@ class Hunter(pg.sprite.Sprite):
         rect = pg.Rect(0, 0, w, h)
         rect.center = self.pos
         pg.draw.ellipse(surf, C.BRIGHT_RED, rect, width=1)
-        
+
         # Cockpit/Cup
         cup = pg.Rect(0, 0, w * 0.5, h * 0.7)
         cup.center = (self.pos.x, self.pos.y - h * 0.3)
         pg.draw.ellipse(surf, C.WHITE, cup, width=1)
+
 
 class PowerUp(pg.sprite.Sprite):
     """Initialize a Powerup"""

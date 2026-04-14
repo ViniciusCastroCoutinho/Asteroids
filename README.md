@@ -30,7 +30,7 @@ Existe um modo de depuração (debug) para testar coisas, principalmente a parte
 
 ## Diagramas
 ![Diagrama C4 Nível 1 - Contexto](diagrams/Diagrama-Nivel-1.jpeg)
-
+ 
 ![Diagrama C4 Nível 2 - Container](diagrams/Diagrama-Nivel-2.jpeg)
 
 ![Diagrama C4 Nível 3 - Componentes](diagrams/Diagrama-Nivel-3.jpeg)
